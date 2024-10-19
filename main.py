@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.formatters import TextFormatter
 
 app = FastAPI()
 
@@ -12,14 +13,27 @@ def get_transcript(youtube_url: str):
         youtube_url: The URL of the YouTube video.
 
     Returns:
-        A list of dictionaries, where each dictionary represents a segment of the 
-        transcript with 'text' and 'start' keys.
-        Returns None if no transcript is found.
+        A formatted string of the video transcript or an error message.
     """
     try:
         video_id = youtube_url.split("v=")[-1]
+        
+        # Retrieve the transcript
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        return transcript
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving transcript: {e}")
+        
+        # Format the transcript as a string
+        formatter = TextFormatter()
+        formatted_transcript = formatter.format_transcript(transcript)
 
+        return {"transcript": formatted_transcript}
+
+    except Exception as e:
+        if "subtitles are disabled" in str(e).lower():
+            raise HTTPException(status_code=404, detail="No transcript available for this video. Subtitles may be disabled.")
+        else:
+            raise HTTPException(status_code=500, detail=f"Error retrieving transcript: {e}")
+
+# If you want to run the application locally, you can add this:
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
