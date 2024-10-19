@@ -18,12 +18,7 @@ def get_transcript(youtube_url: str):
     try:
         video_id = youtube_url.split("v=")[-1]
         
-        # Retrieve the transcript
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        
-        # Format the transcript as a string
-        formatter = TextFormatter()
-        formatted_transcript = formatter.format_transcript(transcript)
+        formatted_transcript = video_id
 
         return {"transcript": formatted_transcript}
 
