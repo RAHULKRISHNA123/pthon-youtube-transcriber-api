@@ -17,7 +17,7 @@ def get_transcript():
     """
 
     youtube_url = request.args.get('youtube_url')
-     if not youtube_url:
+    if not youtube_url:
         return jsonify({"error": "YouTube URL is required"}), 400
 
     try:
