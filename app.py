@@ -23,20 +23,21 @@ def get_transcript():
     try:
         video_id = youtube_url.split("v=")[-1]
 
-        # Retrieve the transcript
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        
-        formatted_transcript = transcript
+        # List available transcripts (languages and types)
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+
+        # Choose a transcript (you can modify this to select a specific language)
+        transcript = None
+        try:
+            # Try to get the transcript in the default language (or choose 'en' for English)
+            transcript = transcript_list.find_transcript(['en'])
+        except:
+            # If not found, try the auto-generated transcript
+            transcript = transcript_list.find_generated_transcript(['en'])
+
+        formatted_transcript = transcript.fetch()
 
         return jsonify({"transcript": formatted_transcript})
 
     except Exception as e:
-        if "subtitles are disabled" in str(e).lower():
-            return jsonify({"error": "No transcript available for this video. Subtitles may be disabled."}), 404
-        else:
-            return jsonify({"error": f"Error retrieving transcript: {e}"}), 500
-
-# If you want to run the application locally, you can add this::..
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+        return jsonify({"error": f"Error retrieving transcript: {e}"}), 500
