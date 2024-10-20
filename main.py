@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from flask import Flask, request, jsonify
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/transcript/")
-def get_transcript(youtube_url: str):
+@app.route('/transcript/', methods=['GET'])
+def get_transcript():
     """
     Retrieves the transcript of a YouTube video.
 
@@ -15,6 +15,11 @@ def get_transcript(youtube_url: str):
     Returns:
         A formatted string of the video transcript or an error message.
     """
+
+    youtube_url = request.args.get('youtube_url')
+     if not youtube_url:
+        return jsonify({"error": "YouTube URL is required"}), 400
+
     try:
         video_id = youtube_url.split("v=")[-1]
 
@@ -23,13 +28,13 @@ def get_transcript(youtube_url: str):
         
         formatted_transcript = transcript
 
-        return {"transcript": formatted_transcript}
+        return jsonify({"transcript": formatted_transcript})
 
     except Exception as e:
         if "subtitles are disabled" in str(e).lower():
-            raise HTTPException(status_code=404, detail="No transcript available for this video. Subtitles may be disabled.")
+            return jsonify({"error": "No transcript available for this video. Subtitles may be disabled."}), 404
         else:
-            raise HTTPException(status_code=500, detail=f"Error retrieving transcript: {e}")
+            return jsonify({"error": f"Error retrieving transcript: {e}"}), 500
 
 # If you want to run the application locally, you can add this:
 # if __name__ == "__main__":
