@@ -36,7 +36,7 @@ def get_transcript():
         else:
             return jsonify({"error": f"Error retrieving transcript: {e}"}), 500
 
-# If you want to run the application locally, you can add this::
+# If you want to run the application locally, you can add this::..
 # if __name__ == "__main__":
 #     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
